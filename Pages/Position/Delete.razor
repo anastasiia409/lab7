@@ -1,0 +1,47 @@
+﻿@page "/deleteposition/{id:int}"
+@model lab7.Pages.Position.DeleteModel
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>Delete position</h1>
+@if(_position != null){
+<EditForm Model="_position" OnValidSubmit="DeletePosition">
+	<label>Name</label>
+	<input value="@_position.Name" readonly />
+	<br/>
+	<label>Salary</label>
+	<input value="@_position.Salary" readonly />
+	<br/>
+	
+	<button type="submit">Delete position</button>
+
+</EditForm>
+}
+else{
+	<h1>Position not found</h1>
+}
+<button><a href="/positions">Return to all positions</a></button>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+	[Parameter] public int id { get; set; }
+	private Position? _position = new Position();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id <= 0)
+		{
+			navigationManager.NavigateTo("/positions");
+		}
+		_position = await httpClient.GetFromJsonAsync<Position>($"api/Position/{id}");
+	}
+
+	private async Task DeletePosition()
+	{
+		if (_position != null)
+		{
+			await httpClient.DeleteAsync($"api/Position/{_position.Id");
+		}
+		navigationManager.NavigateTo("/positions");
+	}
+}

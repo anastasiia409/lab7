@@ -1,0 +1,64 @@
+﻿@page "/positions"
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>All positions</h1>
+<a href="/editposition/0" class="btn btn-primary">Add new position</a>
+@if(positions == null){
+    <h1>Position not found</h1>
+}
+else{
+<table class="table table-bordered table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Salary
+            </th>
+         
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var position in positions)
+        {
+            <tr>
+                <td>
+                    @position.Id
+                </td>
+                <td>
+                    @position.Name
+                </td>
+                <td>
+                    @position.Salary
+                </td>
+                
+                <td>
+                    <a href="/editposition/@position.Id" class="btn btn-warning">Edit position</a>
+                </td>
+                <td>
+                    <a href="/deleteposition/@position.Id" asp-route-id="@position.Id" class="btn btn-danger">Delete position</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+@code {
+    List<Position>? positions = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		positions = await httpClient.GetFromJsonAsync<List<Position>>("api/Position/");
+	}
+}

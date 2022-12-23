@@ -1,0 +1,79 @@
+﻿@page "/editposition/{id:int}"
+@using lab7.Models
+@inject HttpClient httpClient
+
+@{
+	if(id == 0)
+	{
+		<h1>Add position</h1>
+	}
+	else
+	{
+		<h1>Edit position</h1>
+	}
+}
+
+
+
+<EditForm Model="_position" OnValidSubmit="EditPosition">
+	<label for="name">Name position</label>
+	<InputText @bind-Value="_position.Name" id="name" />
+	<br/>
+	<label>Salary</label>
+	<InputNumber @bind-Value="_position.Salary"  />
+	<br/>
+
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<button type="submit">Save changes</button>
+	<button><a href="/positions">Return to all positions</a></button>
+
+</EditForm>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+	private Position? _position = new Position();
+	[Parameter] public int id { get; set; }
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id < 0)
+		{
+			navigationManager.NavigateTo("/positions");
+		}
+
+		if (id != 0)
+		{
+			_position = await httpClient.GetFromJsonAsync<Position>($"api/Position/{id}");
+		}
+	}
+
+	private async Task EditPosition()
+	{
+		if (id == 0)
+		{
+			if(_position!= null)
+			{
+				await httpClient.PostAsJsonAsync<Position>("api/Position/", _position);
+			}
+			else
+			{
+				navigationManager.NavigateTo("/positions");
+			}
+		}
+		else
+		{
+			if (_position != null)
+			{
+				await httpClient.PutAsJsonAsync<Position>($"api/Position/", _position);
+			}
+			else
+			{
+				navigationManager.NavigateTo("/positions");
+			}
+		}
+		navigationManager.NavigateTo("/positions");
+	}
+}

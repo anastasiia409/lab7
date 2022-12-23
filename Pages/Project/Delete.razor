@@ -1,0 +1,52 @@
+﻿@page "/deleteproject/{id:int}"
+@model lab7.Pages.Project.DeleteModel
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>Delete project</h1>
+@if(_project != null){
+<EditForm Model="_project" OnValidSubmit="DeleteProject">
+	<label>Name</label>
+	<input value="@_project.Name" readonly />
+	<br/>
+	<label>DateOfStart</label>
+	<input value="@_project.DateOfStart" readonly />
+	<br/>
+	<label>DateOfEnd</label>
+	<input value="@_project.DateOfEnd" readonly />
+	<br/>
+	<label>Description</label>
+	<input value="@_project.Description" readonly />
+	<br/>
+	<button type="submit">Delete project</button>
+
+</EditForm>
+}
+else{
+	<h1>Project not found</h1>
+}
+<button><a href="/projects">Return to all projects</a></button>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+	[Parameter] public int id { get; set; }
+	private Project? _project = new Project();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id <= 0)
+		{
+			navigationManager.NavigateTo("/projects");
+		}
+		_project = await httpClient.GetFromJsonAsync<Project>($"api/Project/{id}");
+	}
+
+	private async Task DeleteProject()
+	{
+		if (_project != null)
+		{
+			await httpClient.DeleteAsync($"api/Project/{_project.Id");
+		}
+		navigationManager.NavigateTo("/projects");
+	}
+}

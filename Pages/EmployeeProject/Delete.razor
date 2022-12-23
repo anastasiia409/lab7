@@ -1,0 +1,53 @@
+﻿@page "/deleteemployeeproject/{id:int}"
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>Delete employeeproject</h1>
+@if(_eproject == null){
+	<h1>Employee project not found</h1>
+}
+else{
+<EditForm Model="_eproject" OnSubmit="DeleteEmployeeProject">
+	<label>Employee id</label>
+	<input value="@_eproject.EmployeeId" readonly />
+	<br/>
+	<label>Project id</label>
+	<input value="@_eproject.ProjectId" readonly />
+	<br/>
+	<label>Position id</label>
+	<input value="@_eproject.PositionId" readonly />
+	<br/>
+	<label>Date of Join</label>
+	<input value="@_eproject.DateOfJoin.ToString("d")" readonly />
+	<br/>
+	
+	<button type="submit">Delete information employee project</button>
+</EditForm>
+}
+<button><a href="/employeeprjects">Return to all eprojects</a></button>
+
+@code {
+	[Inject] NavigationManager navigationManager { get; set; } = null!;
+	[Parameter] public int id{ get; set; }
+
+	private EmployeeProject? _eproject = null;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id <= 0)
+		{
+			navigationManager.NavigateTo("/employeeprojects");
+		}
+		_eproject = await httpClient.GetFromJsonAsync<EmployeeProject>($"api/EmployeeProject/{id}"); 
+	}
+
+	private async Task DeleteEmployeeProject()
+	{
+		if (_eproject != null)
+		{
+			await httpClient.DeleteAsync($"api/EmployeeProject/{_eproject.ID}");
+		}
+
+		navigationManager.NavigateTo("/employeeprojects");
+	}
+}

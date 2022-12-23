@@ -1,0 +1,74 @@
+﻿@page "/projects"
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>All projects</h1>
+<a href="/editproject/0" class="btn btn-primary">Add new project</a>
+@if(projects == null){
+    <h1>Project not found</h1>
+}
+else{
+<table class="table table-bordered table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                DateOfStart
+            </th>
+            <th>
+                DateOfEnd
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var project in projects)
+        {
+            <tr>
+                <td>
+                    @project.Id
+                </td>
+                <td>
+                    @project.Name
+                </td>
+                <td>
+                    @project.DateOfStart
+                </td>
+                <td>
+                    @project.DateOfEnd
+                </td>
+                <td>
+                    @project.Description
+                </td>
+                <td>
+                    <a href="/editproject/@project.Id" class="btn btn-warning">Edit project</a>
+                </td>
+                <td>
+                    <a href="/deleteproject/@project.Id" asp-route-id="@project.Id" class="btn btn-danger">Delete project</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+@code {
+    List<Project>? projects = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		projects = await httpClient.GetFromJsonAsync<List<Project>>("api/Project/");
+	}
+}

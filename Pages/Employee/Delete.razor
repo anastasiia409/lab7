@@ -1,0 +1,52 @@
+﻿@page "/deleteemployee/{id:int}"
+@model lab7.Pages.Employee.DeleteModel
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>Delete employee</h1>
+@if(_employee != null){
+<EditForm Model="_employee" OnValidSubmit="DeleteEmployee">
+	<label>Name</label>
+	<input value="@_employee.Name" readonly />
+	<br/>
+	<label>Surname</label>
+	<input value="@_employee.Surname" readonly />
+	<br/>
+	<label>Address</label>
+	<input value="@_employee.Address" readonly />
+	<br/>
+	<label>Description</label>
+	<input value="@_employee.Description" readonly />
+	<br/>
+	<button type="submit">Delete employee</button>
+
+</EditForm>
+}
+else{
+	<h1>Employee not found</h1>
+}
+<button><a href="/employees">Return to all employees</a></button>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+	[Parameter] public int id { get; set; }
+	private Employee? _employee = new Employee();
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id <= 0)
+		{
+			navigationManager.NavigateTo("/employees");
+		}
+		_employee = await httpClient.GetFromJsonAsync<Employee>($"api/Employee/{id}");
+	}
+
+	private async Task DeleteEmployee()
+	{
+		if (_employee != null)
+		{
+			await httpClient.DeleteAsync($"api/Employee/{_employee.Id");
+		}
+		navigationManager.NavigateTo("/employees");
+	}
+}

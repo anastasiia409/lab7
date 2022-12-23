@@ -1,0 +1,107 @@
+﻿@page "/addemployeeproject"
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>Add new employee project</h1>
+
+<EditForm Model="_eproject" OnValidSubmit="AddEmployeeProject" >
+	@if(employees == null)
+	{
+		<h1>No emplpoyees</h1>
+	}
+	else
+	{
+	<label for="employee">Choose employee</label>
+	<InputSelect @bind-Value="_eproject.EmployeeId" id="employee">
+		<option value="%" selected>Choose employee</option>
+		@foreach(var employee in employees)
+			{
+				<option value="@employee.Id">@employee.Surname</option>
+			}
+	</InputSelect>
+	}
+	<br/>
+
+	@if(projects == null)
+	{
+		<h1>No projects</h1>
+	}
+	else
+	{
+	<label for="project">Choose project</label>
+	<InputSelect @bind-Value="_eproject.ProjectId" id="project">
+		<option value="%" selected>Choose project</option>
+		@foreach(var project in projects)
+			{
+				<option value="@project.Id">@project.Name</option>
+			}
+	</InputSelect>
+	}
+	<br/>
+
+	@if(positions == null)
+	{
+		<h1>No positions</h1>
+	}
+	else
+	{
+	<label for="position">Choose position</label>
+	<InputSelect @bind-Value="_eproject.PostionId" id="position">
+		<option value="%" selected>Choose position</option>
+		@foreach(var position in positions)
+			{
+				<option value="@position.Id">@position.Name</option>
+			}
+	</InputSelect>
+	}
+	<br/>
+	<label>Date of join</label>
+	<InputDate @bind-Value="_eproject.DateOfJoin" />
+	<br/>
+
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<button type="submit">Create new employee project</button>
+	}
+	<button><a href="/tickets">Return to all employee projects</a></button>
+
+</EditForm>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+
+	private EmployeeProject _eproject = new EmployeeProject();
+	private List<Employee>? employees = null;
+	private Employee? employee = null;
+
+	private List<Project>? projects = null;
+	private Project? project = null;
+	private List<Position>? positions = null;
+	private Position? position = null;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		employees = await httpClient.GetFromJsonAsync<List<Employee>>("api/Employee/");
+		projects = await httpClient.GetFromJsonAsync<List<Project>>("api/Project/");
+		positions = await httpClient.GetFromJsonAsync<List<Position>>("api/Position/");
+	}
+
+	private async Task AddEmployeeProject()
+	{
+		employee = await httpClient.GetFromJsonAsync<Employee>($"api/Employee/{_eproject.EmployeeId}");
+		project = await httpClient.GetFromJsonAsync<Project>($"api/Project/{_eproject.ProjectId}");
+		position = await httpClient.GetFromJsonAsync<Position>($"api/Position/{_eproject.PositionId}");
+
+		if (employee != null && project != null && position != null)
+		{
+			_eproject.Employee = employee;
+			_eproject.Project = project;
+			_eproject.Position = position;
+			await httpClient.PostAsJsonAsync<EmployeeProject>("api/EmployeeProject/", _eproject);
+		}
+
+		navigationManager.NavigateTo("/employeeprojects");
+	} 
+}

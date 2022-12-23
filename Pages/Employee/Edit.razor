@@ -1,0 +1,85 @@
+﻿@page "/editemployee/{id:int}"
+@using lab7.Models
+@inject HttpClient httpClient
+
+@{
+	if(id == 0)
+	{
+		<h1>Add employee</h1>
+	}
+	else
+	{
+		<h1>Edit employee</h1>
+	}
+}
+
+
+
+<EditForm Model="_employee" OnValidSubmit="EditEmployee">
+	<label for="name">Name employee</label>
+	<InputText @bind-Value="_employee.Name" id="name" />
+	<br/>
+	<label for="surname">Surname</label>
+	<InputText @bind-Value="_employee.Surname" id="surname" />
+	<br/>
+	<label>Address</label>
+	<InputText @bind-Value="_employee.Address"  />
+	<br/>
+	<label>Description</label>
+	<InputText @bind-Value="_employee.Description"  />
+	<br/>
+
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<button type="submit">Save chnages</button>
+	<button><a href="/employees">Return to all employees</a></button>
+
+</EditForm>
+
+@code {
+	[Inject] NavigationManager navigationManager{ get; set; } = null!;
+	private Employee? _employee = new Employee();
+	[Parameter] public int id { get; set; }
+
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(id < 0)
+		{
+			navigationManager.NavigateTo("/employees");
+		}
+
+		if (id != 0)
+		{
+			_employee = await httpClient.GetFromJsonAsync<Employee>($"api/Employee/{id}");
+		}
+	}
+
+	private async Task EditEmployee()
+	{
+		if (id == 0)
+		{
+			if(_employee!= null)
+			{
+				await httpClient.PostAsJsonAsync<Employee>("api/Employee/", _employee);
+			}
+			else
+			{
+				navigationManager.NavigateTo("/employees");
+			}
+		}
+		else
+		{
+			if (_employee != null)
+			{
+				await httpClient.PutAsJsonAsync<Employee>($"api/Employee/", _employee);
+			}
+			else
+			{
+				navigationManager.NavigateTo("/employees");
+			}
+		}
+		navigationManager.NavigateTo("/employees");
+	}
+}

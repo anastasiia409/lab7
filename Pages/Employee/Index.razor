@@ -1,0 +1,74 @@
+﻿@page "/employees"
+@using lab7.Models
+@inject HttpClient httpClient
+
+<h1>All employees</h1>
+<a href="/editemployee/0" class="btn btn-primary">Add new employee</a>
+@if(employees == null){
+    <h1>Employee not found</h1>
+}
+else{
+<table class="table table-bordered table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>
+                Id
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Surname
+            </th>
+            <th>
+                Address
+            </th>
+            <th>
+                Description
+            </th>
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var employee in employees)
+        {
+            <tr>
+                <td>
+                    @employee.Id
+                </td>
+                <td>
+                    @employee.Name
+                </td>
+                <td>
+                    @employee.Surname
+                </td>
+                <td>
+                    @employee.Address
+                </td>
+                <td>
+                    @employee.Description
+                </td>
+                <td>
+                    <a href="/editemployee/@employee.Id" class="btn btn-warning">Edit employee</a>
+                </td>
+                <td>
+                    <a href="/deleteemployee/@employee.Id" asp-route-id="@employee.Id" class="btn btn-danger">Delete employee</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
+@code {
+    List<Employee>? employees = null;
+
+	protected override async Task OnInitializedAsync()
+	{
+		employees = await httpClient.GetFromJsonAsync<List<Employee>>("api/Employee/");
+	}
+}
